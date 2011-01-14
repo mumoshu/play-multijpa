@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * play.db.jpa.JPQLの複数DB対応版
+ * Modified version of play.db.jpa.JPQL which has the ability to controll multiple databases.
  */
 public class JPQL extends play.db.jpa.JPQL {
     private static Map<String, JPQL> instances = new HashMap<String, JPQL>();
@@ -14,7 +14,7 @@ public class JPQL extends play.db.jpa.JPQL {
 
     @Override
     public EntityManager em() {
-        return MultiJPA.em(databaseName);
+        return DatastoreServiceRegistry.getCurrentEntityManager(databaseName);
     }
 
     public JPQL(String databaseName) {
@@ -38,6 +38,11 @@ public class JPQL extends play.db.jpa.JPQL {
      * @return An instance of JPQL, not null.
      */
     public static JPQL getInstance(String databaseName) {
-        return instances.get(databaseName);
+        JPQL instance = instances.get(databaseName);
+
+        if (instance == null) {
+            instance = new JPQL(databaseName);
+        }
+        return instance;
     }
 }

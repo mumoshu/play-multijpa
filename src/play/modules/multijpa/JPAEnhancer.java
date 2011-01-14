@@ -55,9 +55,9 @@ public class JPAEnhancer extends Enhancer {
         Database database = findAnnotation(ctClass, Database.class);
 
         if (database != null) {
-            argument = database.value();
+            argument = "\"" + database.value() + "\"";
         } else {
-            argument = "";
+            argument = "\"default\"";
         }
 
         CtMethod getJPQL = CtMethod.make("public static JPQL getJQPL() { return play.modules.multijpa.JPQL.getInstance(" + argument + "); }", ctClass);
