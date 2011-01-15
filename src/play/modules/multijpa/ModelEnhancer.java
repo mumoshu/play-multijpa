@@ -12,7 +12,7 @@ import java.lang.annotation.Annotation;
 /**
  * Enhance JPABase entities classes
  */
-public class JPAEnhancer extends Enhancer {
+public class ModelEnhancer extends Enhancer {
 
     /**
      * Find annotation named <code>annotationName</code>

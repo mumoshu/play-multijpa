@@ -3,31 +3,14 @@ package play.modules.multijpa;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
 import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.FlushModeType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.NoResultException;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
-import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
@@ -40,9 +23,7 @@ import org.hibernate.type.Type;
 import play.Invoker.InvocationContext;
 import play.Logger;
 import play.Play;
-import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.data.binding.Binder;
 import play.db.DB;
 import play.db.Model;
 import play.db.jpa.GenericModel;
@@ -94,7 +75,7 @@ public class MultiJPAPlugin extends JPAPlugin {
 
     @Override
     public void enhance(ApplicationClass applicationClass) throws Exception {
-        new JPAEnhancer().enhanceThisClass(applicationClass);
+        new ModelEnhancer().enhanceThisClass(applicationClass);
     }
 
     @Override
@@ -309,7 +290,7 @@ public class MultiJPAPlugin extends JPAPlugin {
 
     @Override
     public void invocationFinally() {
-        // does nothing if transactions are already ended.
+        // This does nothing if transactions are already ended.
         endTransactions(true);
     }
 
