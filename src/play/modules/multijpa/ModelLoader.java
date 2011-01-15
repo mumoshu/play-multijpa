@@ -29,7 +29,7 @@ public class ModelLoader implements Model.Factory {
     }
 
     private EntityManager em() {
-        return DatastoreServiceRegistry.getCurrentEntityManager(getDatabaseName());
+        return DatastoreRegistry.getCurrentEntityManager(getDatabaseName());
     }
 
     public Model findById(Object id) {

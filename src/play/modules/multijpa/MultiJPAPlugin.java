@@ -1,37 +1,19 @@
 package play.modules.multijpa;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.persistence.Entity;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Level;
-import org.hibernate.CallbackException;
-import org.hibernate.EmptyInterceptor;
-import org.hibernate.collection.PersistentCollection;
-import org.hibernate.ejb.Ejb3Configuration;
-import org.hibernate.type.Type;
-
-import play.Invoker.InvocationContext;
-import play.Logger;
-import play.Play;
+//import play.Invoker.InvocationContext;
 import play.classloading.ApplicationClasses.ApplicationClass;
-import play.db.DB;
 import play.db.Model;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPABase;
 import play.db.jpa.JPAPlugin;
-import play.exceptions.JPAException;
 import play.exceptions.UnexpectedException;
-import play.utils.Utils;
 
 /**
  * JPA Plugin
@@ -50,7 +32,7 @@ public class MultiJPAPlugin extends JPAPlugin {
             if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
                 String id = params.get(idKey)[0];
                 try {
-                    Query query = DatastoreServiceRegistry.getCurrentEntityManager(clazz).createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
+                    Query query = DatastoreRegistry.getCurrentEntityManager(clazz).createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
                     query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
                     Object o = query.getSingleResult();
                     return GenericModel.edit(o, name, params, annotations);
@@ -80,12 +62,12 @@ public class MultiJPAPlugin extends JPAPlugin {
 
     @Override
     public void onApplicationStart() {
-        DatastoreConfiguration.createEntityManagerFactories();
+        // DatastoreConfiguration.createEntityManagerFactories();
     }
 
     @Override
     public void onApplicationStop() {
-        // DatastoreServiceRegistry.cleanAllEntityManagerFactories();
+        // DatastoreRegistry.cleanAllEntityManagerFactories();
     }
 
     @Override
@@ -115,7 +97,7 @@ public class MultiJPAPlugin extends JPAPlugin {
     }
 
     private void endTransactions(boolean rollback) {
-        DatastoreServiceRegistry.current().endTransactions(rollback);
+        DatastoreRegistry.current().endTransactions(rollback);
     }
 
     @Override
@@ -128,7 +110,7 @@ public class MultiJPAPlugin extends JPAPlugin {
 
     @Override
     public void afterFixtureLoad() {
-        DatastoreServiceRegistry.current().clearAllEntityManagers();
+        DatastoreRegistry.current().clearAllEntityManagers();
     }
 
 

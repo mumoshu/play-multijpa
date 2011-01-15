@@ -1,17 +1,18 @@
 package play.modules.multijpa;
 
+import com.sun.javaws.exceptions.InvalidArgumentException;
 import play.Logger;
 import play.exceptions.JPAException;
 
 import javax.persistence.*;
 
 /**
- * DatastoreService for single database, not thread-safe.<br />
+ * Datastore for single database, not thread-safe.<br />
  * Instances of this class is created for each database and each thread.
  */
-public class DatastoreService {
+public class Datastore {
 
-    private EntityManagerFactory entityManagerFactory = null;
+    private EntityManagerFactory entityManagerFactory;
 
     private EntityManager entityManager = null;
 
@@ -20,14 +21,14 @@ public class DatastoreService {
      */
     boolean readonly = true;
     /**
-     * If true, DatastoreServiceRegistry automatically starts a JPA transaction for each invocation.
+     * If true, DatastoreRegistry automatically starts a JPA transaction for each invocation.
      */
     boolean autoTxs = true;
 
     boolean transactionBegan = false;
 
-    public boolean isEnabled() {
-        return entityManagerFactory != null;
+    public Datastore(EntityManagerFactory entityManagerFactory) {
+        this.entityManagerFactory = entityManagerFactory;
     }
 
     /**
@@ -35,7 +36,7 @@ public class DatastoreService {
      * @return <code>null</code> if application.conf does not contain a database configuration for <code>databaseName</code>.
      */
     public EntityManager getEntityManager() {
-        Logger.debug("DatastoreService automatically starting a transaction.");
+        Logger.debug("Datastore automatically starting a transaction.");
         // TODO when "readonly" is set in the original JPAPlugin.
         beginTransaction(false);
         return entityManager;
@@ -54,7 +55,7 @@ public class DatastoreService {
      * @param readonly true for a readonly transaction
      */
     public void beginTransaction(boolean readonly) {
-        if (!isEnabled() || transactionBegan) {
+        if (transactionBegan) {
             return;
         }
         transactionBegan = true;
@@ -108,5 +109,9 @@ public class DatastoreService {
             entityManager = null;
             transactionBegan = false;
         }
+    }
+
+    public void clearContext() {
+        entityManager.clear();
     }
 }

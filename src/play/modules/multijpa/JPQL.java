@@ -14,7 +14,7 @@ public class JPQL extends play.db.jpa.JPQL {
 
     @Override
     public EntityManager em() {
-        return DatastoreServiceRegistry.getCurrentEntityManager(databaseName);
+        return DatastoreRegistry.getCurrentEntityManager(databaseName);
     }
 
     public JPQL(String databaseName) {

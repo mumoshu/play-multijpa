@@ -1,6 +1,5 @@
 package play.modules.multijpa;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Level;
 import org.hibernate.CallbackException;
 import org.hibernate.EmptyInterceptor;
@@ -10,8 +9,6 @@ import org.hibernate.type.Type;
 import play.Logger;
 import play.Play;
 import play.classloading.ApplicationClasses;
-import play.db.DB;
-import play.db.jpa.JPA;
 import play.db.jpa.JPABase;
 import play.exceptions.JPAException;
 import play.utils.Utils;
@@ -30,6 +27,7 @@ public class DatastoreConfiguration {
 
     private String databaseName;
     private EntityManagerFactory entityManagerFactory;
+    private DataSourceRegistry dataSourceRegistry = new DataSourceRegistry();
 
     /**
      * Creates a database configuration from application.conf.
@@ -62,7 +60,7 @@ public class DatastoreConfiguration {
      * @return
      */
     private Ejb3Configuration createEjb3Configuration() {
-        DataSource dataSource = DatasourceRegistry.get(databaseName);
+        DataSource dataSource = dataSourceRegistry.get(databaseName);
         String defaultDriverName = Play.configuration.getProperty("db.driver");
         String driverName = Play.configuration.getProperty("db." + databaseName + ".driver");
 

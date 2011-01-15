@@ -2,54 +2,51 @@ package play.modules.multijpa;
 
 import javax.persistence.EntityManager;
 
-import play.exceptions.JPAException;
-
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * JPA Support<br />
  * <br />
- * When the application starts, MultiJPAPlugin creates an instance of DatastoreServiceRegistry for each database configurations.<br />
+ * When the application starts, MultiJPAPlugin creates an instance of DatastoreRegistry for each database configurations.<br />
  * <br />
- * On initialization. DatastoreServiceRegistry creates an EntityManagerFactory for a database configuration.<br />
+ * On initialization. DatastoreRegistry creates an EntityManagerFactory for a database configuration.<br />
  * <br />
- * For each request, DatastoreServiceRegistry:<br />
+ * For each request, DatastoreRegistry:<br />
  * - creates an EntityManager fomr the EntityManagerFactory<br />
  * - starts a transaction<br />
  * - query the database<br />
  * - closes the transaction
  *
  * <pre>
- * Thread 1...1 DatastoreServiceRegistry 1...N DatastoreService
+ * Thread 1...1 DatastoreRegistry 1...N Datastore
  *
- * DatastoreService 1...1 DatastoreConfiguration 1...1 Ejb3Configuration
+ * Datastore 1...1 DatastoreConfiguration 1...1 Ejb3Configuration
  *                           | creates
  *                  1...1 EntityMangerFactory
  *                           | creates
  *                  1...1 EntityManager
  * </pre>
  */
-public class DatastoreServiceRegistry {
+public class DatastoreRegistry {
 
-    private static ThreadLocal<DatastoreServiceRegistry> currentDatastoreServiceRegistry = new ThreadLocal<DatastoreServiceRegistry>();
+    private static ThreadLocal<DatastoreRegistry> currentDatastoreServiceRegistry = new ThreadLocal<DatastoreRegistry>();
 
     /**
      * A map of EntityManagers for each database name.
      */
-    private Map<String, DatastoreService> datastoreServices = new HashMap<String, DatastoreService>();
+    private Map<String, Datastore> datastoreServices = new HashMap<String, Datastore>();
 
     /**
-     * Returns the instance of DatastoreServiceRegistry, dedicated for the current thread.
+     * Returns the instance of DatastoreRegistry, dedicated for the current thread.
      * @return
      */
-    public static DatastoreServiceRegistry current() {
-        DatastoreServiceRegistry registry = currentDatastoreServiceRegistry.get();
+    public static DatastoreRegistry current() {
+        DatastoreRegistry registry = currentDatastoreServiceRegistry.get();
 
         if (registry == null) {
-            registry = DatastoreServiceRegistryFactory.createDatastoreServiceRegistry();
+            registry = new DatastoreRegistry();
             //throw new JPAException("The JPA context is not initialized. JPA Entity Manager automatically start when one or more classes annotated with the @javax.persistence.Entity annotation are found in the application.");
         }
         return registry;
@@ -76,20 +73,23 @@ public class DatastoreServiceRegistry {
         return getCurrentEntityManager(ModelEnhancer.getDatabaseName(clazz));
     }
 
-    public void put(String databaseName, DatastoreService datastoreService) {
-        datastoreServices.put(databaseName, datastoreService);
-    }
-
     /**
-     * Retrieve the DatastoreService for the databaseName.
+     * Retrieve the Datastore for the databaseName.
      * @param databaseName
      * @return null if databaseName which is not defined in application.conf
      */
-    public DatastoreService get(String databaseName) {
-        return datastoreServices.get(databaseName);
+    public Datastore get(String databaseName) {
+        Datastore datastore = datastoreServices.get(databaseName);
+
+        if (datastore != null) {
+            return datastore;
+        } else {
+            datastore = new DatastoreFactory().createDatastore(databaseName);
+        }
+        return datastore;
     }
 
-    public Collection<DatastoreService> all() {
+    public Collection<Datastore> all() {
         return datastoreServices.values();
     }
 
@@ -98,16 +98,14 @@ public class DatastoreServiceRegistry {
      * @param rollback true if do rollback
      */
     public void endTransactions(boolean rollback) {
-        for (DatastoreService datastoreService : all()) {
-            datastoreService.endTransaction(rollback);
+        for (Datastore datastore : all()) {
+            datastore.endTransaction(rollback);
         }
     }
 
     public void clearAllEntityManagers() {
-        for (DatastoreService datastoreService : all()) {
-            if (datastoreService.isEnabled()) {
-                datastoreService.getEntityManager().clear();
-            }
+        for (Datastore datastore : all()) {
+            datastore.clearContext();
         }
     }
 }
