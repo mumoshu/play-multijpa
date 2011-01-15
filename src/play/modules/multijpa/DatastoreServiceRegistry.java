@@ -55,6 +55,17 @@ public class DatastoreServiceRegistry {
         return current().get(databaseName).getEntityManager();
     }
 
+    /**
+     * Retrieve the EntityManager for the dabatase connected with an Entity class, and current thread.<br />
+     *
+     * @param clazz an instance of Class<T>, which is used to get database name.
+     * @param <T> a subclass of Entity
+     * @return always not null
+     */
+    public static <T> EntityManager getCurrentEntityManager(Class<T> clazz) {
+        return getCurrentEntityManager(ModelEnhancer.getDatabaseName(clazz));
+    }
+
     public void put(String databaseName, DatastoreService datastoreService) {
         datastoreServices.put(databaseName, datastoreService);
     }

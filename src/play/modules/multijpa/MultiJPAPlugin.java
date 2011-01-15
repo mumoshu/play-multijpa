@@ -50,7 +50,7 @@ public class MultiJPAPlugin extends JPAPlugin {
             if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
                 String id = params.get(idKey)[0];
                 try {
-                    Query query = JPA.em().createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
+                    Query query = DatastoreServiceRegistry.getCurrentEntityManager(clazz).createQuery("from " + clazz.getName() + " o where o." + keyName + " = ?");
                     query.setParameter(1, play.data.binding.Binder.directBind(name, annotations, id + "", Model.Manager.factoryFor(clazz).keyType()));
                     Object o = query.getSingleResult();
                     return GenericModel.edit(o, name, params, annotations);

@@ -50,15 +50,31 @@ public class ModelEnhancer extends Enhancer {
         }
     }
 
-    private void makeAndAddGetJQPLMethod(CtClass ctClass) throws CannotCompileException {
-        String argument;
+    public static <T> String getDatabaseName(Class<T> clazz) {
+        Database database = clazz.getAnnotation(Database.class);
+        String databaseName = database.value();
+
+        if (databaseName != null) {
+            return databaseName;
+        } else {
+            return "default";
+        }
+    }
+
+    public static String getDatabaseName(CtClass ctClass) {
+        String databaseName;
         Database database = findAnnotation(ctClass, Database.class);
 
         if (database != null) {
-            argument = "\"" + database.value() + "\"";
+            databaseName = "\"" + database.value() + "\"";
         } else {
-            argument = "\"default\"";
+            databaseName = "\"default\"";
         }
+        return databaseName;
+    }
+
+    private void makeAndAddGetJQPLMethod(CtClass ctClass) throws CannotCompileException {
+        String argument = getDatabaseName(ctClass);
 
         CtMethod getJPQL = CtMethod.make("public static JPQL getJQPL() { return play.modules.multijpa.JPQL.getInstance(" + argument + "); }", ctClass);
         ctClass.addMethod(getJPQL);
