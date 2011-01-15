@@ -21,6 +21,16 @@ import java.util.Map;
  * - starts a transaction<br />
  * - query the database<br />
  * - closes the transaction
+ *
+ * <pre>
+ * Thread 1...1 DatastoreServiceRegistry 1...N DatastoreService
+ *
+ * DatastoreService 1...1 DatastoreConfiguration 1...1 Ejb3Configuration
+ *                           | creates
+ *                  1...1 EntityMangerFactory
+ *                           | creates
+ *                  1...1 EntityManager
+ * </pre>
  */
 public class DatastoreServiceRegistry {
 
