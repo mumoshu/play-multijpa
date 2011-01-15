@@ -1,6 +1,5 @@
 package play.modules.multijpa;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import play.Logger;
 import play.exceptions.JPAException;
 
