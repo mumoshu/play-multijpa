@@ -8,9 +8,11 @@ import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
 //import play.Invoker.InvocationContext;
+import play.Logger;
 import play.classloading.ApplicationClasses.ApplicationClass;
 import play.db.Model;
 import play.db.jpa.GenericModel;
+import play.db.jpa.JPA;
 import play.db.jpa.JPABase;
 import play.db.jpa.JPAPlugin;
 import play.exceptions.UnexpectedException;
@@ -26,7 +28,7 @@ public class MultiJPAPlugin extends JPAPlugin {
     @SuppressWarnings("unchecked")
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
-        if (JPABase.class.isAssignableFrom(clazz)) {
+        if (BaseModel.class.isAssignableFrom(clazz)) {
             String keyName = Model.Manager.factoryFor(clazz).keyName();
             String idKey = name + "." + keyName;
             if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
@@ -62,6 +64,9 @@ public class MultiJPAPlugin extends JPAPlugin {
 
     @Override
     public void onApplicationStart() {
+        Logger.debug("MultiJPAPlugin#index=" + index);
+        // Skip Play!'s JPAPlugin#onApplicationStart()
+        JPA.entityManagerFactory = new DummyEntityManagerFactory();
         // DatastoreConfiguration.createEntityManagerFactories();
     }
 
@@ -72,6 +77,8 @@ public class MultiJPAPlugin extends JPAPlugin {
 
     @Override
     public void beforeInvocation() {
+        // Disables Play!'s JPAPlugin
+        JPA.entityManagerFactory = null;
         /*boolean readOnly = false;
         Transactional tx = InvocationContext.current().getAnnotation(Transactional.class);
         if (tx != null) {

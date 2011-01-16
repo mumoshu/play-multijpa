@@ -66,9 +66,9 @@ public class ModelEnhancer extends Enhancer {
         Database database = findAnnotation(ctClass, Database.class);
 
         if (database != null) {
-            databaseName = "\"" + database.value() + "\"";
+            databaseName = database.value();
         } else {
-            databaseName = "\"default\"";
+            databaseName = "default";
         }
         return databaseName;
     }
@@ -76,7 +76,7 @@ public class ModelEnhancer extends Enhancer {
     private void makeAndAddGetJQPLMethod(CtClass ctClass) throws CannotCompileException {
         String argument = getDatabaseName(ctClass);
 
-        CtMethod getJPQL = CtMethod.make("public static JPQL getJQPL() { return play.modules.multijpa.JPQL.getInstance(" + argument + "); }", ctClass);
+        CtMethod getJPQL = CtMethod.make("public static play.modules.multijpa.JPQL getJQPL() { return play.modules.multijpa.JPQL.getInstance(" + argument + "); }", ctClass);
         ctClass.addMethod(getJPQL);
     }
 
@@ -94,54 +94,56 @@ public class ModelEnhancer extends Enhancer {
 
         String entityName = ctClass.getName();
 
-        makeAndAddGetJQPLMethod(ctClass);
+        //makeAndAddGetJQPLMethod(ctClass);
+
+        String jpql = "play.modules.multijpa.JPQL.getInstance(\"" + getDatabaseName(ctClass) + "\")";
 
         // count
-        CtMethod count = CtMethod.make("public static long count() { return getJPQL().count(\"" + entityName + "\"); }", ctClass);
+        CtMethod count = CtMethod.make("public static long count() { return " + jpql + ".count(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(count);
 
         // count2
-        CtMethod count2 = CtMethod.make("public static long count(String query, Object[] params) { return getJPQL().count(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod count2 = CtMethod.make("public static long count(String query, Object[] params) { return " + jpql + ".count(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(count2);
 
         // findAll
-        CtMethod findAll = CtMethod.make("public static java.util.List findAll() { return getJPQL().findAll(\"" + entityName + "\"); }", ctClass);
+        CtMethod findAll = CtMethod.make("public static java.util.List findAll() { return " + jpql + ".findAll(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(findAll);
 
         // findById
-        CtMethod findById = CtMethod.make("public static play.db.jpa.JPABase findById(Object id) { return getJPQL().findById(\"" + entityName + "\", id); }", ctClass);
+        CtMethod findById = CtMethod.make("public static play.db.jpa.JPABase findById(Object id) { return " + jpql + ".findById(\"" + entityName + "\", id); }", ctClass);
         ctClass.addMethod(findById);
 
         // findBy
-        CtMethod findBy = CtMethod.make("public static java.util.List findBy(String query, Object[] params) { return getJPQL().findBy(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod findBy = CtMethod.make("public static java.util.List findBy(String query, Object[] params) { return " + jpql + ".findBy(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(findBy);
 
         // find
-        CtMethod find = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find(String query, Object[] params) { return getJPQL().find(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod find = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find(String query, Object[] params) { return " + jpql + ".find(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(find);
 
         // find
-        CtMethod find2 = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find() { return getJPQL().find(\"" + entityName + "\"); }", ctClass);
+        CtMethod find2 = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery find() { return " + jpql + ".find(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(find2);
 
         // all
-        CtMethod all = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery all() { return getJPQL().all(\"" + entityName + "\"); }", ctClass);
+        CtMethod all = CtMethod.make("public static play.db.jpa.GenericModel.JPAQuery all() { return " + jpql + ".all(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(all);
 
         // delete
-        CtMethod delete = CtMethod.make("public static int delete(String query, Object[] params) { return getJPQL().delete(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod delete = CtMethod.make("public static int delete(String query, Object[] params) { return " + jpql + ".delete(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(delete);
 
         // deleteAll
-        CtMethod deleteAll = CtMethod.make("public static int deleteAll() { return getJPQL().deleteAll(\"" + entityName + "\"); }", ctClass);
+        CtMethod deleteAll = CtMethod.make("public static int deleteAll() { return " + jpql + ".deleteAll(\"" + entityName + "\"); }", ctClass);
         ctClass.addMethod(deleteAll);
 
         // findOneBy
-        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPABase findOneBy(String query, Object[] params) { return getJPQL().findOneBy(\"" + entityName + "\", query, params); }", ctClass);
+        CtMethod findOneBy = CtMethod.make("public static play.db.jpa.JPABase findOneBy(String query, Object[] params) { return " + jpql + ".findOneBy(\"" + entityName + "\", query, params); }", ctClass);
         ctClass.addMethod(findOneBy);
 
         // create
-        CtMethod create = CtMethod.make("public static play.db.jpa.JPABase create(String name, play.mvc.Scope.Params params) { return getJPQL().create(\"" + entityName + "\", name, params); }", ctClass);
+        CtMethod create = CtMethod.make("public static play.db.jpa.JPABase create(String name, play.mvc.Scope.Params params) { return " + jpql + ".create(\"" + entityName + "\", name, params); }", ctClass);
         ctClass.addMethod(create);
 
         // Done.
