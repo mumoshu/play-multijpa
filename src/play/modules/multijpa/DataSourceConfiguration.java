@@ -39,7 +39,9 @@ public class DataSourceConfiguration {
     }
 
     public String getDB() {
-        return get("db");
+        String defaultValue = properties.getProperty(prefix);
+        String specificValue = properties.getProperty(prefix + "." + name);
+        return specificValue != null ? specificValue : defaultValue;
     }
 
     public String getUrl() {
