@@ -24,7 +24,7 @@ import play.exceptions.UnexpectedException;
 /**
  * JPA Plugin
  */
-public class MultiJPAPlugin extends JPAPlugin {
+public class MultiJPAPlugin extends PlayPlugin {
 
     public static boolean autoTxs = true;
 
