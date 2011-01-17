@@ -52,9 +52,9 @@ public class ModelEnhancer extends Enhancer {
 
     public static <T> String getDatabaseName(Class<T> clazz) {
         Database database = clazz.getAnnotation(Database.class);
-        String databaseName = database.value();
+        String databaseName;
 
-        if (databaseName != null) {
+        if (database != null && (databaseName = database.value()) != null) {
             return databaseName;
         } else {
             return "default";
