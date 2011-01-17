@@ -1,6 +1,7 @@
 package play.modules.multijpa;
 
 import java.lang.annotation.Annotation;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.persistence.Entity;
@@ -9,7 +10,10 @@ import javax.persistence.Query;
 
 //import play.Invoker.InvocationContext;
 import play.Logger;
+import play.Play;
+import play.PlayPlugin;
 import play.classloading.ApplicationClasses.ApplicationClass;
+import play.db.DBPlugin;
 import play.db.Model;
 import play.db.jpa.GenericModel;
 import play.db.jpa.JPA;
@@ -28,7 +32,7 @@ public class MultiJPAPlugin extends JPAPlugin {
     @SuppressWarnings("unchecked")
     public Object bind(String name, Class clazz, java.lang.reflect.Type type, Annotation[] annotations, Map<String, String[]> params) {
         // TODO need to be more generic in order to work with JPASupport
-        if (BaseModel.class.isAssignableFrom(clazz)) {
+        if (JPABase.class.isAssignableFrom(clazz)) {
             String keyName = Model.Manager.factoryFor(clazz).keyName();
             String idKey = name + "." + keyName;
             if (params.containsKey(idKey) && params.get(idKey).length > 0 && params.get(idKey)[0] != null && params.get(idKey)[0].trim().length() > 0) {
@@ -120,5 +124,15 @@ public class MultiJPAPlugin extends JPAPlugin {
         DatastoreRegistry.current().clearAllEntityManagers();
     }
 
+    @Override
+    public void onLoad() {
+        for (Iterator<PlayPlugin> iterator = Play.plugins.iterator(); iterator.hasNext(); ) {
+            PlayPlugin plugin = iterator.next();
 
+            if (plugin instanceof JPAPlugin || plugin instanceof DBPlugin) {
+                Logger.debug("MultiJPAPlugin is removing " + plugin.getClass().getName() + " from Play.plugins");
+                iterator.remove();
+            }
+        }
+    }
 }
